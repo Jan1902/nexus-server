@@ -17,4 +17,8 @@
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.10.0" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<ProjectReference Include="..\Nexus.Framework.CodeGeneration.Shared\Nexus.Framework.CodeGeneration.Shared.csproj"/>
+	</ItemGroup>
+
 </Project>

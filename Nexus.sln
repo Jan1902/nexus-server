@@ -24,6 +24,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nexus.Networking.Abstractio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nexus.Networking.CodeGeneration", "Nexus.Networking.CodeGeneration\Nexus.Networking.CodeGeneration.csproj", "{DBA68158-0824-4527-A9F3-DC6999613A25}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nexus.Framework.CodeGeneration.Shared", "Nexus.Framework.CodeGeneration.Shared\Nexus.Framework.CodeGeneration.Shared.csproj", "{0E401346-B289-4BA2-9745-3F3473A2D737}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nexus.Networking.Test", "Nexus.Networking.Test\Nexus.Networking.Test.csproj", "{907656D6-F224-460D-AE73-1B0710DE1E7D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +54,14 @@ Global
 		{DBA68158-0824-4527-A9F3-DC6999613A25}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DBA68158-0824-4527-A9F3-DC6999613A25}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DBA68158-0824-4527-A9F3-DC6999613A25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E401346-B289-4BA2-9745-3F3473A2D737}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E401346-B289-4BA2-9745-3F3473A2D737}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E401346-B289-4BA2-9745-3F3473A2D737}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E401346-B289-4BA2-9745-3F3473A2D737}.Release|Any CPU.Build.0 = Release|Any CPU
+		{907656D6-F224-460D-AE73-1B0710DE1E7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{907656D6-F224-460D-AE73-1B0710DE1E7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{907656D6-F224-460D-AE73-1B0710DE1E7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{907656D6-F224-460D-AE73-1B0710DE1E7D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -59,6 +71,8 @@ Global
 		{6E9248B5-9D07-4906-B6B3-5F3DF8EDD2D2} = {EC975EBA-BD13-422B-A1AB-FBDBB6F47B6C}
 		{270AF04C-3051-4AF9-8C5C-47B9F4FB62C9} = {0799307E-2978-44AB-8FA8-0C1EA52EA86E}
 		{DBA68158-0824-4527-A9F3-DC6999613A25} = {0799307E-2978-44AB-8FA8-0C1EA52EA86E}
+		{0E401346-B289-4BA2-9745-3F3473A2D737} = {EC975EBA-BD13-422B-A1AB-FBDBB6F47B6C}
+		{907656D6-F224-460D-AE73-1B0710DE1E7D} = {0799307E-2978-44AB-8FA8-0C1EA52EA86E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6187091A-ED9B-4F74-ABA4-A52DD20AE7A4}
