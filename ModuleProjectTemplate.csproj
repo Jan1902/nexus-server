@@ -1,0 +1,22 @@
+<Project>
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup Condition="'$(ProjectName)' != 'Nexus.Framework.Abstraction'">
+		<ProjectReference Include="..\Nexus.Framework.Abstraction\Nexus.Framework.Abstraction.csproj" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(ProjectName)' != 'Nexus.Networking.Abstraction'">
+		<ProjectReference Include="..\Nexus.Networking.Abstraction\Nexus.Networking.Abstraction.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="MediatR" Version="12.4.1" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
+	</ItemGroup>
+
+</Project>

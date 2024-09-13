@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Nexus.Start": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
