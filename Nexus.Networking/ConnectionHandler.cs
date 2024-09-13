@@ -5,7 +5,10 @@ using System.Net.Sockets;
 
 namespace Nexus.Networking;
 
-internal class ConnectionHandler(ILogger<ConnectionHandler> logger, ClientConnectionFactory connectionFactory) : IInitializeAndRunAsync, IShutdownAsync
+internal class ConnectionHandler(
+    ILogger<ConnectionHandler> logger,
+    ClientConnectionFactory connectionFactory,
+    NetworkingConfiguration configuration) : IInitializeAndRunAsync, IShutdownAsync
 {
     private TcpListener? _tcpListener;
 
@@ -13,8 +16,10 @@ internal class ConnectionHandler(ILogger<ConnectionHandler> logger, ClientConnec
 
     public Task InitializeAsync(CancellationToken cancellationToken)
     {
-        _tcpListener = new TcpListener(IPAddress.Any, 25565);
+        _tcpListener = new TcpListener(IPAddress.Any, configuration.Port);
         _tcpListener.Start();
+
+        logger.LogInformation("Listening on port {port}", configuration.Port);
 
         return Task.CompletedTask;
     }

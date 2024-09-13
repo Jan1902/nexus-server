@@ -9,5 +9,7 @@ public class NetworkingModule : ModuleBase
     {
         builder.RegisterType<ClientConnectionFactory>();
         builder.RegisterType<ConnectionHandler>().SingleInstance().AsImplementedInterfaces();
+
+        builder.RegisterConfiguration<NetworkingConfiguration>();
     }
 }

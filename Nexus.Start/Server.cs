@@ -8,6 +8,8 @@ internal class Server(
     ILogger<Server> logger,
     IComponentContext context)
 {
+    private const int ShutdownTimeoutMS = 5000;
+
     public async Task RunAsync(CancellationToken cancellationToken)
     {
         logger.LogInformation("Starting server...");
@@ -33,7 +35,7 @@ internal class Server(
 
         try
         {
-            var timeoutTask = Task.Delay(5000);
+            var timeoutTask = Task.Delay(ShutdownTimeoutMS);
             var shutdownTask = Task.WhenAll(context.Resolve<IEnumerable<IShutdownAsync>>().Select(i => i.ShutdownAsync(cancellationToken)));
 
             var firstTask = await Task.WhenAny(shutdownTask, timeoutTask);

@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using MediatR.Extensions.Autofac.DependencyInjection;
 using MediatR.Extensions.Autofac.DependencyInjection.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Nexus.Framework.Abstraction;
 using Nexus.Networking;
@@ -26,6 +27,13 @@ internal class ServerBuilder
             .WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day);
 
         builder.RegisterSerilog(loggerConfiguration);
+
+        // Configuration
+        var configuration = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json")
+            .Build();
+
+        builder.RegisterInstance(configuration).As<IConfiguration>();
 
         // MediatR
         var mediatRConfiguration = MediatRConfigurationBuilder
