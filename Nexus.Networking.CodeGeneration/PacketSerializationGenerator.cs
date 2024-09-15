@@ -62,6 +62,13 @@ public class PacketSerializationGenerator : ISourceGenerator
     private CodeTemplate ArrayWriteTemplate => CodeTemplate.GetTemplate("Writing", "ArrayWrite");
     private CodeTemplate ModelWriteTemplate => CodeTemplate.GetTemplate("Writing", "ModelWrite");
 
+    private CodeTemplate DefaultReadTemplate => CodeTemplate.GetTemplate("Reading", "DefaultRead");
+    private CodeTemplate ConditionalReadTemplate => CodeTemplate.GetTemplate("Reading", "ConditionalRead");
+    private CodeTemplate ArrayReadTemplate => CodeTemplate.GetTemplate("Reading", "ArrayRead");
+    private CodeTemplate ModelReadTemplate => CodeTemplate.GetTemplate("Reading", "ModelRead");
+    private CodeTemplate LengthPrefixReadTemplate => CodeTemplate.GetTemplate("Reading", "LengthPrefixRead");
+    private CodeTemplate ReturnConstructorTemplate => CodeTemplate.GetTemplate("Reading", "ReturnConstructor");
+
     public void Initialize(GeneratorInitializationContext context)
         => context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
 
@@ -88,6 +95,7 @@ public class PacketSerializationGenerator : ISourceGenerator
         template.Set("deserializeContent", BuildDeserializeMethod(packet));
 
         var test = template.Render();
+        test = FormatCode(test);
 
         return template.Render();
     }
@@ -132,7 +140,6 @@ public class PacketSerializationGenerator : ISourceGenerator
 
             // Binary writer method
             var writerMethod = MapTypeToReaderWriterMethod(parameterType);
-            var writerMethodParameters = new List<string>();
 
             // Type overwrite
             var overwriteTypeAttribute = parameter.AttributeLists.SelectMany(l => l.Attributes).FirstOrDefault(a => a.Name.ToString() == OverwriteTypeAttributeName);
@@ -209,7 +216,7 @@ public class PacketSerializationGenerator : ISourceGenerator
                     .Set("field", parameterName)
                     .Set("writeContent", currentText);
 
-                parameterBuilder.Append(template.Render());
+                parameterBuilder.AppendLine(template.Render());
             }
 
             builder.Append(parameterBuilder);
@@ -220,7 +227,152 @@ public class PacketSerializationGenerator : ISourceGenerator
 
     private string BuildDeserializeMethod(RecordDeclarationSyntax packet)
     {
-        return "return null;";
+        var builder = new StringBuilder();
+
+        var parameters = new List<string>();
+
+        foreach (var parameter in packet.ParameterList?.Parameters ?? [])
+        {
+            var parameterBuilder = new StringBuilder();
+
+            // Parameter name and type
+            var parameterName = parameter.Identifier.Text;
+            parameterName = parameterName.Substring(0, 1).ToLower() + parameterName.Substring(1);
+
+            var parameterType = parameter.Type?.ToString();
+            parameterType = parameterType?.Replace("?", "");
+
+            if (parameterType is null)
+                continue;
+
+            // Arrays
+            var isArray = false;
+            if (parameterType.EndsWith("[]"))
+            {
+                isArray = true;
+                parameterType = parameterType.Substring(0, parameterType.Length - 2);
+            }
+
+            // Fixed length for arrays
+            var lengthAttribute = parameter.AttributeLists.SelectMany(l => l.Attributes).FirstOrDefault(a => a.Name.ToString() == LengthAttributeName);
+            int? fixedLength = null;
+            if (lengthAttribute is not null)
+            {
+                var lengthString = lengthAttribute.ArgumentList?.Arguments.FirstOrDefault()?.ToString();
+
+                if (lengthString is not null)
+                    fixedLength = int.Parse(lengthString);
+            }
+
+            // Conditional values
+            var conditional = parameter.AttributeLists.Any(l => l.Attributes.Any(a => a.Name.ToString() == ConditionalAttributeName));
+
+            // Binary reader method
+            var readerMethod = MapTypeToReaderWriterMethod(parameterType);
+            var readerMethodParameters = new List<string>();
+
+            // Type overwrite
+            var overwriteTypeAttribute = parameter.AttributeLists.SelectMany(l => l.Attributes).FirstOrDefault(a => a.Name.ToString() == OverwriteTypeAttributeName);
+            if (overwriteTypeAttribute is not null)
+            {
+                var memberAccess = (MemberAccessExpressionSyntax?) overwriteTypeAttribute.ArgumentList?.Arguments.FirstOrDefault()?.Expression;
+
+                if (memberAccess is not null)
+                    readerMethod = memberAccess.Name.Identifier.ValueText;
+            }
+
+            // Bit sets
+            var bitSetAttribute = parameter.AttributeLists.SelectMany(l => l.Attributes).FirstOrDefault(a => a.Name.ToString() == BitSetAttributeName);
+            if (bitSetAttribute is not null)
+            {
+                isArray = false;
+                readerMethod = "BitSet";
+            }
+
+            // Bit fields
+            var isBitField = false;
+            if (parameter.AttributeLists.Any(l => l.Attributes.Any(a => a.Name.ToString() == BitFieldAttributeName)))
+            {
+                readerMethod = "Byte";
+                isBitField = true;
+            }
+
+            // Byte arrays
+            if (readerMethod == "Byte" && isArray)
+            {
+                readerMethod = "Bytes";
+                isArray = false;
+                parameterType = "byte[]";
+
+                if (fixedLength is null)
+                    readerMethod = "BytesWithVarIntPrefix";
+            }
+
+            CodeTemplate readTemplate;
+            if (readerMethod is null)
+            {
+                readTemplate = ModelReadTemplate
+                    .Set("variable", parameterName)
+                    .Set("type", parameterType);
+            }
+            else
+            {
+                readTemplate = DefaultReadTemplate
+                    .Set("type", parameterType)
+                    .Set("variable", parameterName)
+                    .Set("readerMethod", readerMethod)
+                    .Set("cast", isBitField ? "(byte)" : string.Empty);
+            }
+
+            // Array
+            if (isArray)
+            {
+                if (fixedLength is not null)
+                {
+                    var lengthPrefixTemplate = LengthPrefixReadTemplate
+                        .Set("variable", parameterName);
+
+                    parameterBuilder.AppendLine(lengthPrefixTemplate.Render());
+                }
+
+                var template = ArrayReadTemplate
+                    .Set("length", fixedLength is not null ? fixedLength.ToString(): $"{parameterName}Length")
+                    .Set("type", parameterType)
+                    .Set("variable", parameterName)
+                    .Set("readContent", readTemplate.Render());
+
+                parameterBuilder.AppendLine(template.Render());
+            }
+            else
+            {
+                parameterBuilder.AppendLine(readTemplate.Render());
+            }
+
+            if (conditional)
+            {
+                var currentText = parameterBuilder.ToString();
+                parameterBuilder.Clear();
+
+                var template = ConditionalReadTemplate
+                    .Set("type", parameterType)
+                    .Set("variable", parameterName)
+                    .Set("readContent", currentText);
+
+                parameterBuilder.AppendLine(template.Render());
+            }
+
+            builder.Append(parameterBuilder);
+
+            parameters.Add(parameterName);
+        }
+
+        var returnTemplate = ReturnConstructorTemplate
+            .Set("type", packet.Identifier.Text)
+            .Set("parameters", string.Join(", ", parameters));
+
+        builder.Append(returnTemplate.Render());
+
+        return builder.ToString();
     }
 
     public static string? MapTypeToReaderWriterMethod(string type)
@@ -242,5 +394,46 @@ public class PacketSerializationGenerator : ISourceGenerator
             "NbtTag" => "NbtTag",
             _ => null
         };
+    }
+
+    private static string FormatCode(string code)
+    {
+        var lines = code.Split('\n').Select(s => s.Trim());
+
+        var strBuilder = new StringBuilder();
+
+        int indentCount = 0;
+        bool shouldIndent = false;
+
+        foreach (string line in lines)
+        {
+            if (shouldIndent)
+                indentCount++;
+
+            if (line.Trim() == "}")
+                indentCount--;
+
+            if (indentCount == 0)
+            {
+                strBuilder.AppendLine(line);
+                shouldIndent = line.Contains("{");
+
+                continue;
+            }
+
+            string blankSpace = string.Empty;
+            for (int i = 0; i < indentCount; i++)
+            {
+                blankSpace += "    ";
+            }
+
+            if (line.Contains("}") && line.Trim() != "}")
+                indentCount--;
+
+            strBuilder.AppendLine(blankSpace + line);
+            shouldIndent = line.Contains("{");
+        }
+
+        return strBuilder.ToString();
     }
 }

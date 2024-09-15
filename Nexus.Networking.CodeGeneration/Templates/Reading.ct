@@ -1,18 +1,24 @@
-﻿#DefaultAssignment
-{{type}} {{variable}} = reader.Read{{readerMethod}}();
+﻿#DefaultRead
+{{type}} {{variable}} = {{cast}}reader.Read{{readerMethod}}();
 
-#ConditionalAssignment
+#ModelRead
+{{type}} {{variable}} = {{type}}Serializer.DeserializeModel();
+
+#ConditionalRead
 {{type}}? {{variable}} = null;
 if (reader.ReadBool())
 {
-     {{assignment}}
+    {{readContent}}
 }
 
-#ArrayAssignment
+#LengthPrefixRead
+int {{variable}}Length = reader.ReadVarInt();
+
+#ArrayRead
 {{type}}[] {{variable}} = new {{type}}[{{length}}];
-for (int i = 0; i < {{length}}; i++)
+for (int i = 0; i < {{variable}}.Length; i++)
 {
-    {{assignment}}
+    {{readContent}}
 })
 
 #ReturnConstructor

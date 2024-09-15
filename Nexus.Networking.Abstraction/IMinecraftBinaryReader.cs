@@ -26,6 +26,8 @@ public interface IMinecraftBinaryReader : IDisposable
     /// <returns>An array of bytes read from the stream.</returns>
     byte[] ReadBytes(int count);
 
+    byte[] ReadBytesWithVarIntPrefix();
+
     /// <summary>
     /// Reads a double value from the binary stream.
     /// </summary>
