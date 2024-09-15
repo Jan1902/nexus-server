@@ -50,6 +50,7 @@ public class PacketSerializationGenerator : ISourceGenerator
     private const string BitSetAttributeName = "BitSet";
     private const string OverwriteTypeAttributeName = "OverwriteType";
     private const string LengthAttributeName = "Length";
+    private const string EnumAttributeName = "Enum";
 
     private const string FallbackNamespace = "Vortex.Generated";
     private const string FileNameSuffix = "_Serializer.g.cs";
@@ -94,10 +95,10 @@ public class PacketSerializationGenerator : ISourceGenerator
         template.Set("serializeContent", BuildSerializeMethod(packet));
         template.Set("deserializeContent", BuildDeserializeMethod(packet));
 
-        var test = template.Render();
-        test = FormatCode(test);
+        var content = template.Render();
+        content = FormatCode(content);
 
-        return template.Render();
+        return content;
     }
 
     private string BuildSerializeMethod(RecordDeclarationSyntax packet)
@@ -159,12 +160,20 @@ public class PacketSerializationGenerator : ISourceGenerator
                 writerMethod = "BitSet";
             }
 
+            string? castType = null;
+
             // Bit fields
-            var isBitField = false;
             if (parameter.AttributeLists.Any(l => l.Attributes.Any(a => a.Name.ToString() == BitFieldAttributeName)))
             {
                 writerMethod = "Byte";
-                isBitField = true;
+                castType = "byte";
+            }
+
+            // Enums
+            if (parameter.AttributeLists.Any(l => l.Attributes.Any(a => a.Name.ToString() == EnumAttributeName)))
+            {
+                writerMethod = "VarInt";
+                castType = "int";
             }
 
             // Byte arrays
@@ -190,7 +199,7 @@ public class PacketSerializationGenerator : ISourceGenerator
                 writeTemplate = DefaultWriteTemplate
                     .Set("field", parameterName)
                     .Set("writerMethod", writerMethod)
-                    .Set("cast", isBitField ? "(byte)" : string.Empty);
+                    .Set("cast", castType is not null ? $"({castType}) " : string.Empty);
             }
 
             // Array
@@ -297,6 +306,14 @@ public class PacketSerializationGenerator : ISourceGenerator
                 isBitField = true;
             }
 
+            // Enums
+            var isEnum = false;
+            if (parameter.AttributeLists.Any(l => l.Attributes.Any(a => a.Name.ToString() == EnumAttributeName)))
+            {
+                readerMethod = "VarInt";
+                isEnum = true;
+            }
+
             // Byte arrays
             if (readerMethod == "Byte" && isArray)
             {
@@ -321,7 +338,7 @@ public class PacketSerializationGenerator : ISourceGenerator
                     .Set("type", parameterType)
                     .Set("variable", parameterName)
                     .Set("readerMethod", readerMethod)
-                    .Set("cast", isBitField ? "(byte)" : string.Empty);
+                    .Set("cast", isBitField || isEnum ? $"({parameterType}) " : string.Empty);
             }
 
             // Array
@@ -336,7 +353,7 @@ public class PacketSerializationGenerator : ISourceGenerator
                 }
 
                 var template = ArrayReadTemplate
-                    .Set("length", fixedLength is not null ? fixedLength.ToString(): $"{parameterName}Length")
+                    .Set("length", fixedLength is not null ? fixedLength.ToString() : $"{parameterName}Length")
                     .Set("type", parameterType)
                     .Set("variable", parameterName)
                     .Set("readContent", readTemplate.Render());

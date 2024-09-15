@@ -23,7 +23,7 @@ internal class ServerBuilder
 
         // Logging
         var loggerConfiguration = new LoggerConfiguration()
-            .WriteTo.Console()
+            .WriteTo.Console().MinimumLevel.Verbose()
             .WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day);
 
         builder.RegisterSerilog(loggerConfiguration);
@@ -57,7 +57,7 @@ internal class ServerBuilder
 
         var logger = container.Resolve<ILogger<ServerBuilder>>();
 
-        logger.LogInformation("Loaded {Count} modules", Modules.Count());
+        logger.LogInformation("Loaded {Count} modules", Modules.Length);
         logger.LogInformation("Done building server");
 
         return container.Resolve<Server>();

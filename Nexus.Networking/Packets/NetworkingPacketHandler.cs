@@ -4,7 +4,7 @@ namespace Nexus.Networking.Packets;
 
 internal class NetworkingPacketHandler : IPacketHandler<Handshake>
 {
-    public Task HandlePacket(Handshake packet, CancellationToken cancellationToken)
+    public Task HandlePacket(Handshake packet, Guid clientId, CancellationToken cancellationToken)
     {
         return Task.CompletedTask;
     }

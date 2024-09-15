@@ -47,7 +47,7 @@ public class CodeTemplate
             else
                 end -= 1;
 
-            _template = content.Substring(start, end - start).Trim();
+            _template = content.Substring(start, end - start + 1).Trim();
         }
         else
         {
@@ -62,13 +62,6 @@ public class CodeTemplate
     /// <param name="section">The optional section name within the template file.</param>
     /// <returns>The code template.</returns>
     public static CodeTemplate GetTemplate(string templateFileName, string? section = null) => new(templateFileName, section);
-
-    /// <summary>
-    /// Gets a code template by the template tuple containing the template file name and optional section name.
-    /// </summary>
-    /// <param name="template">The template tuple containing the template file name and optional section name.</param>
-    /// <returns>The code template.</returns>
-    public static CodeTemplate GetTemplate((string Template, string? Section) template) => new(template.Template, template.Section);
 
     /// <summary>
     /// Sets the value of a variable in the code template.

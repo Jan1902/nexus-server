@@ -1,12 +1,22 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.IO;
+using Nexus.Networking.Data;
+using Nexus.Networking.Packets;
 using System.Net.Sockets;
-using System.Text;
 
 namespace Nexus.Networking.Connections;
 
-internal class ClientConnection(TcpClient tcpClient, ILogger<ClientConnection> logger)
+internal class ClientConnection(
+    TcpClient tcpClient,
+    PacketManager packetManager,
+    ILogger<ClientConnection> logger)
 {
     public Guid ClientId { get; } = Guid.NewGuid();
+
+    private readonly byte[] _buffer = new byte[4096];
+    private int _currentLength;
+
+    private static readonly RecyclableMemoryStreamManager _memoryStreamManager = new();
 
     public async Task ListenAsync(CancellationToken cancellationToken)
     {
@@ -14,14 +24,25 @@ internal class ClientConnection(TcpClient tcpClient, ILogger<ClientConnection> l
 
         while (tcpClient.Connected)
         {
-            var buffer = new byte[4096];
-            var bytesRead = await networkStream.ReadAsync(new Memory<byte>(buffer), cancellationToken);
+            var bytesRead = await networkStream.ReadAsync(new Memory<byte>(_buffer), cancellationToken);
+            _currentLength += bytesRead;
 
             if (bytesRead == 0)
                 break;
 
-            var message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-            logger.LogInformation("Received message from client {id}: {message}", ClientId, message);
+            var stream = _memoryStreamManager.GetStream(_buffer);
+            var reader = new MinecraftBinaryReader(stream);
+            var length = reader.ReadVarInt();
+
+            if (length > _currentLength)
+                continue;
+
+            var packetData = reader.ReadBytes(length);
+            packetManager.EnqueuePacket(packetData, ClientId);
+
+            _currentLength = 0;
+
+            logger.LogTrace("Received packet from client {id}", ClientId);
         }
 
         logger.LogInformation("Client {id} disconnected", ClientId);

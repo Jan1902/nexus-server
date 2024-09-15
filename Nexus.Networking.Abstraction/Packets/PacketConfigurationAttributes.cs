@@ -160,7 +160,7 @@ public enum OverwriteType
 }
 
 /// <summary>
-/// Specifies that a class is a model used inside packets.
+/// Specifies that the parameter is an enum.
 /// </summary>
-[AttributeUsage(AttributeTargets.Class)]
-public class PacketModelAttribute : Attribute;
+[AttributeUsage(AttributeTargets.Parameter)]
+public class EnumAttribute : Attribute;

@@ -16,6 +16,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Nexus.Shared\Nexus.Shared.csproj" />
+		<ProjectReference Include="..\Nexus.Networking.CodeGeneration\Nexus.Networking.CodeGeneration.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 
 	<ItemGroup>

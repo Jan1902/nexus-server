@@ -18,7 +18,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Nexus.Framework.CodeGeneration.Shared\Nexus.Framework.CodeGeneration.Shared.csproj"/>
+		<ProjectReference Include="..\Nexus.Framework.CodeGeneration.Shared\Nexus.Framework.CodeGeneration.Shared.csproj" OutputItemType="Analyzer"/>
 	</ItemGroup>
 
 </Project>
