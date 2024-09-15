@@ -1,4 +1,4 @@
-﻿namespace Nexus.Networking.Abstraction;
+﻿namespace Nexus.Networking.Abstraction.Packets;
 
 /// <summary>
 /// Represents the type of length for a field.

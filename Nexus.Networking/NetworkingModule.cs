@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Nexus.Framework.Abstraction;
+using Nexus.Networking.Connections;
 
 namespace Nexus.Networking;
 

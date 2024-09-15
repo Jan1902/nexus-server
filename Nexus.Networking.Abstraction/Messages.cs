@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Nexus.Networking.Abstraction.Packets;
 
 namespace Nexus.Networking.Abstraction;
 

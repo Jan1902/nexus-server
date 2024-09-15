@@ -1,4 +1,4 @@
-﻿namespace Nexus.Networking.Abstraction;
+﻿namespace Nexus.Networking.Abstraction.Packets;
 
 public enum PacketDirection
 {

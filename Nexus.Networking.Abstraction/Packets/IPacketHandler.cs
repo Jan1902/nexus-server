@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace Nexus.Networking.Abstraction;
+namespace Nexus.Networking.Abstraction.Packets;
 
 public interface IPacketHandler<TPacket> : INotificationHandler<PacketReceivedMessage<TPacket>> where TPacket : PacketBase
 {

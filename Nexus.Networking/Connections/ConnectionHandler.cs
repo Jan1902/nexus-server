@@ -3,7 +3,7 @@ using Nexus.Framework.Abstraction;
 using System.Net;
 using System.Net.Sockets;
 
-namespace Nexus.Networking;
+namespace Nexus.Networking.Connections;
 
 internal class ConnectionHandler(
     ILogger<ConnectionHandler> logger,

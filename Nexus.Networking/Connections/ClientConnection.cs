@@ -2,7 +2,7 @@
 using System.Net.Sockets;
 using System.Text;
 
-namespace Nexus.Networking;
+namespace Nexus.Networking.Connections;
 
 internal class ClientConnection(TcpClient tcpClient, ILogger<ClientConnection> logger)
 {

@@ -1,6 +1,6 @@
 ﻿using Nexus.Shared;
 
-namespace Nexus.Networking.Abstraction;
+namespace Nexus.Networking.Abstraction.Data;
 
 /// <summary>
 /// Represents a binary writer for writing Minecraft data types to a stream.

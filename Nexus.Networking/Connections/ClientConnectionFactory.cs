@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System.Net.Sockets;
 
-namespace Nexus.Networking;
+namespace Nexus.Networking.Connections;
 
 internal class ClientConnectionFactory(IComponentContext context)
 {
