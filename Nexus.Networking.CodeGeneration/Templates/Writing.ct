@@ -1,0 +1,19 @@
+﻿#DefaultWrite
+writer.Write{{writerMethod}}({{cast}}subject.{{field}});
+
+#ModelWrite
+new {{type}}Serializer().SerializeModel(subject.{{field}}, writer);
+
+#ArrayWrite
+writer.WriteVarInt(subject.{{field}}.Length);
+foreach (var item in subject.{{field}})
+{
+	{{writeContent}}
+}
+
+#ConditionalWrite
+writer.WriteBool(subject.{{field}} != null);
+if (subject.{{field}} != null)
+{
+	{{writeContent}}
+}

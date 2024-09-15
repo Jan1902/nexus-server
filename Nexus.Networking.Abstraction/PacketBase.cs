@@ -1,3 +1,3 @@
 ﻿namespace Nexus.Networking.Abstraction;
 
-public interface IPacket;
+public abstract record PacketBase;

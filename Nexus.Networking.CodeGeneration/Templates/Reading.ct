@@ -1,0 +1,19 @@
+﻿#DefaultAssignment
+{{type}} {{variable}} = reader.Read{{readerMethod}}();
+
+#ConditionalAssignment
+{{type}}? {{variable}} = null;
+if (reader.ReadBool())
+{
+     {{assignment}}
+}
+
+#ArrayAssignment
+{{type}}[] {{variable}} = new {{type}}[{{length}}];
+for (int i = 0; i < {{length}}; i++)
+{
+    {{assignment}}
+})
+
+#ReturnConstructor
+return new {{type}}({{parameters}});

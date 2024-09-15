@@ -3,7 +3,7 @@ using Nexus.Networking.Abstraction;
 
 namespace Nexus.Networking;
 
-internal class MessageHandler<TPacket> : INotificationHandler<SendPacketMessage<TPacket>> where TPacket : IPacket
+internal class MessageHandler<TPacket> : INotificationHandler<SendPacketMessage<TPacket>> where TPacket : PacketBase
 {
     public Task Handle(SendPacketMessage<TPacket> message, CancellationToken cancellationToken)
     {

@@ -1,5 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<Import Project="..\CodeGenerationProjectTemplate.csproj"/>
+	<Import Project="..\CodeGenerationProjectTemplate.csproj" />
+
+	<ItemGroup>
+	  <None Remove="Templates\ModelSerializer.ct" />
+	  <None Remove="Templates\PacketSerializer.ct" />
+	  <None Remove="Templates\Reading.ct" />
+	  <None Remove="Templates\Writing.ct" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Templates\ModelSerializer.ct" />
+	  <EmbeddedResource Include="Templates\PacketSerializer.ct" />
+	  <EmbeddedResource Include="Templates\Reading.ct" />
+	  <EmbeddedResource Include="Templates\Writing.ct" />
+	</ItemGroup>
 
 </Project>

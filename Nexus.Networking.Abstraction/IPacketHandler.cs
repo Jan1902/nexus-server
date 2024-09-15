@@ -2,7 +2,7 @@
 
 namespace Nexus.Networking.Abstraction;
 
-public interface IPacketHandler<TPacket> : INotificationHandler<PacketReceivedMessage<TPacket>> where TPacket : IPacket
+public interface IPacketHandler<TPacket> : INotificationHandler<PacketReceivedMessage<TPacket>> where TPacket : PacketBase
 {
     Task HandlePacket(TPacket packet, CancellationToken cancellationToken);
 
