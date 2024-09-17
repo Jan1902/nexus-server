@@ -1,8 +1,14 @@
 ﻿#DefaultRead
-{{type}} {{variable}} = {{cast}}reader.Read{{readerMethod}}();
+{{cast}}reader.Read{{readerMethod}}()
 
 #ModelRead
-{{type}} {{variable}} = {{type}}Serializer.DeserializeModel();
+new {{type}}Serializer().DeserializeModel(reader)
+
+#DefaultAssignment
+{{type}} {{variable}} = {{readContent}};
+
+#IndexAssignment
+{{variable}}[i] = {{readContent}};
 
 #ConditionalRead
 {{type}}? {{variable}} = null;
@@ -19,7 +25,7 @@ int {{variable}}Length = reader.ReadVarInt();
 for (int i = 0; i < {{variable}}.Length; i++)
 {
     {{readContent}}
-})
+}
 
 #ReturnConstructor
 return new {{type}}({{parameters}});

@@ -14,15 +14,19 @@ internal class Server(
     {
         logger.LogInformation("Starting server...");
 
-        logger.LogInformation("Initializing services");
-
         try
         {
-            await Task.WhenAll(context.Resolve<IEnumerable<IInitializeAsync>>().Select(i => i.InitializeAsync(cancellationToken)));
+            var servicesToInitialize = context.Resolve<IEnumerable<IInitializeAsync>>();
+            logger.LogInformation("Initializing {count} services", servicesToInitialize.Count());
+            var initializeTasks = servicesToInitialize.Select(i => i.InitializeAsync(cancellationToken)).ToList();
 
-            logger.LogInformation("Running services...");
+            await Task.WhenAll(initializeTasks);
 
-            await Task.WhenAll(context.Resolve<IEnumerable<IRunAsync>>().Select(i => i.RunAsync(cancellationToken)));
+            var servicesToRun = context.Resolve<IEnumerable<IRunAsync>>();
+            logger.LogInformation("Running {count} services", servicesToRun.Count());
+            var runTasks = servicesToRun.Select(i => i.RunAsync(cancellationToken)).ToList();
+
+            await Task.WhenAll(runTasks);
         }
         catch (Exception e) when (e is TaskCanceledException or OperationCanceledException)
         {
@@ -35,8 +39,14 @@ internal class Server(
 
         try
         {
-            var timeoutTask = Task.Delay(ShutdownTimeoutMS);
-            var shutdownTask = Task.WhenAll(context.Resolve<IEnumerable<IShutdownAsync>>().Select(i => i.ShutdownAsync(cancellationToken)));
+            var timeoutTask = Task.Delay(ShutdownTimeoutMS, CancellationToken.None);
+
+
+            var servicesToShutdown = context.Resolve<IEnumerable<IShutdownAsync>>();
+            logger.LogInformation("Shutting down {count} services", servicesToShutdown.Count());
+            var shutdownTasks = servicesToShutdown.Select(i => i.ShutdownAsync(cancellationToken));
+
+            var shutdownTask = Task.WhenAll();
 
             var firstTask = await Task.WhenAny(shutdownTask, timeoutTask);
             if (firstTask == timeoutTask)

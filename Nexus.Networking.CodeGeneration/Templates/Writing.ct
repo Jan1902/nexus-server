@@ -1,8 +1,11 @@
 ﻿#DefaultWrite
-writer.Write{{writerMethod}}({{cast}}subject.{{field}});
+writer.Write{{writerMethod}}({{writeContent}});
 
 #ModelWrite
-new {{type}}Serializer().SerializeModel(subject.{{field}}, writer);
+new {{type}}Serializer().SerializeModel({{writeContent}}, writer);
+
+#DefaultAccess
+{{cast}}subject.{{field}}
 
 #ArrayWrite
 writer.WriteVarInt(subject.{{field}}.Length);

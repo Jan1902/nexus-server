@@ -27,7 +27,7 @@ public class SyntaxReceiver : ISyntaxReceiver
                     return;
 
                 var models = declaration.ParameterList.Parameters
-                    .Select(a => a.Type?.ToString() ?? string.Empty)
+                    .Select(a => a.Type?.ToString().Replace("[]", "").Replace("?", "") ?? string.Empty)
                     .Where(a => PacketSerializationGenerator.MapTypeToReaderWriterMethod(a) is null);
 
                 _foundModels.AddRange(models.Where(m => !_foundModels.Contains(m)));
@@ -62,11 +62,14 @@ public class PacketSerializationGenerator : ISourceGenerator
     private CodeTemplate ConditionalWriteTemplate => CodeTemplate.GetTemplate("Writing", "ConditionalWrite");
     private CodeTemplate ArrayWriteTemplate => CodeTemplate.GetTemplate("Writing", "ArrayWrite");
     private CodeTemplate ModelWriteTemplate => CodeTemplate.GetTemplate("Writing", "ModelWrite");
+    private CodeTemplate DefaultAccess => CodeTemplate.GetTemplate("Writing", "DefaultAccess");
 
     private CodeTemplate DefaultReadTemplate => CodeTemplate.GetTemplate("Reading", "DefaultRead");
+    private CodeTemplate ModelReadTemplate => CodeTemplate.GetTemplate("Reading", "ModelRead");
+    private CodeTemplate DefaultAssignmentTemplate => CodeTemplate.GetTemplate("Reading", "DefaultAssignment");
+    private CodeTemplate IndexAssignmentTemplate => CodeTemplate.GetTemplate("Reading", "IndexAssignment");
     private CodeTemplate ConditionalReadTemplate => CodeTemplate.GetTemplate("Reading", "ConditionalRead");
     private CodeTemplate ArrayReadTemplate => CodeTemplate.GetTemplate("Reading", "ArrayRead");
-    private CodeTemplate ModelReadTemplate => CodeTemplate.GetTemplate("Reading", "ModelRead");
     private CodeTemplate LengthPrefixReadTemplate => CodeTemplate.GetTemplate("Reading", "LengthPrefixRead");
     private CodeTemplate ReturnConstructorTemplate => CodeTemplate.GetTemplate("Reading", "ReturnConstructor");
 
@@ -112,7 +115,6 @@ public class PacketSerializationGenerator : ISourceGenerator
             // Parameter name and type
             var parameterName = parameter.Identifier.Text;
             var parameterType = parameter.Type?.ToString();
-            parameterType = parameterType?.Replace("?", "");
 
             if (parameterType is null)
                 continue;
@@ -122,7 +124,7 @@ public class PacketSerializationGenerator : ISourceGenerator
             if (parameterType.EndsWith("[]"))
             {
                 isArray = true;
-                parameterType = parameterType.Substring(0, parameterType.Length - 2);
+                parameterType = parameterType.Replace("[]", "");
             }
 
             // Fixed length for arrays
@@ -136,8 +138,14 @@ public class PacketSerializationGenerator : ISourceGenerator
                     fixedLength = int.Parse(lengthString);
             }
 
+            var conditional = false;
             // Conditional values
-            var conditional = parameter.AttributeLists.Any(l => l.Attributes.Any(a => a.Name.ToString() == ConditionalAttributeName));
+            if (parameter.AttributeLists.Any(l => l.Attributes.Any(a => a.Name.ToString() == ConditionalAttributeName))
+                    || parameterType.EndsWith("?"))
+            {
+                parameterType = parameterType?.Replace("?", "");
+                conditional = true;
+            }
 
             // Binary writer method
             var writerMethod = MapTypeToReaderWriterMethod(parameterType);
@@ -187,24 +195,23 @@ public class PacketSerializationGenerator : ISourceGenerator
                     writerMethod = "BytesWithVarIntPrefix";
             }
 
+            CodeTemplate defaultAccess = DefaultAccess
+                .Set("field", parameterName)
+                .Set("cast", castType is not null ? $"({castType}) " : string.Empty);
+
             CodeTemplate writeTemplate;
             if (writerMethod is null)
-            {
-                writeTemplate = ModelWriteTemplate
-                    .Set("field", parameterName)
-                    .Set("type", parameterType);
-            }
+                writeTemplate = ModelWriteTemplate.Set("type", parameterType);
             else
-            {
-                writeTemplate = DefaultWriteTemplate
-                    .Set("field", parameterName)
-                    .Set("writerMethod", writerMethod)
-                    .Set("cast", castType is not null ? $"({castType}) " : string.Empty);
-            }
+                writeTemplate = DefaultWriteTemplate.Set("writerMethod", writerMethod);
+
+            writeTemplate.Set("writeContent", defaultAccess.Render());
 
             // Array
             if (isArray)
             {
+                writeTemplate.Set("writeContent", "item");
+
                 var template = ArrayWriteTemplate
                     .Set("field", parameterName)
                     .Set("writeContent", writeTemplate.Render());
@@ -329,14 +336,11 @@ public class PacketSerializationGenerator : ISourceGenerator
             if (readerMethod is null)
             {
                 readTemplate = ModelReadTemplate
-                    .Set("variable", parameterName)
                     .Set("type", parameterType);
             }
             else
             {
                 readTemplate = DefaultReadTemplate
-                    .Set("type", parameterType)
-                    .Set("variable", parameterName)
                     .Set("readerMethod", readerMethod)
                     .Set("cast", isBitField || isEnum ? $"({parameterType}) " : string.Empty);
             }
@@ -344,7 +348,7 @@ public class PacketSerializationGenerator : ISourceGenerator
             // Array
             if (isArray)
             {
-                if (fixedLength is not null)
+                if (fixedLength is null)
                 {
                     var lengthPrefixTemplate = LengthPrefixReadTemplate
                         .Set("variable", parameterName);
@@ -352,17 +356,26 @@ public class PacketSerializationGenerator : ISourceGenerator
                     parameterBuilder.AppendLine(lengthPrefixTemplate.Render());
                 }
 
+                var indexAssignmentTemplate = IndexAssignmentTemplate
+                    .Set("variable", parameterName)
+                    .Set("readContent", readTemplate.Render());
+
                 var template = ArrayReadTemplate
                     .Set("length", fixedLength is not null ? fixedLength.ToString() : $"{parameterName}Length")
                     .Set("type", parameterType)
                     .Set("variable", parameterName)
-                    .Set("readContent", readTemplate.Render());
+                    .Set("readContent", indexAssignmentTemplate.Render());
 
                 parameterBuilder.AppendLine(template.Render());
             }
             else
             {
-                parameterBuilder.AppendLine(readTemplate.Render());
+                var assignmentTemplate = DefaultAssignmentTemplate
+                    .Set("type", parameterType)
+                    .Set("variable", parameterName)
+                    .Set("readContent", readTemplate.Render());
+
+                parameterBuilder.AppendLine(assignmentTemplate.Render());
             }
 
             if (conditional)

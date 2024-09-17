@@ -57,8 +57,7 @@ internal class ServerBuilder
 
         var logger = container.Resolve<ILogger<ServerBuilder>>();
 
-        logger.LogInformation("Loaded {Count} modules", Modules.Length);
-        logger.LogInformation("Done building server");
+        logger.LogInformation("Done building server with {count} modules", Modules.Length);
 
         return container.Resolve<Server>();
     }

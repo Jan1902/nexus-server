@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Nexus.Framework.Abstraction;
+using Nexus.Networking.Abstraction;
+using Nexus.Networking.Abstraction.Packets;
 using System.Net;
 using System.Net.Sockets;
 
@@ -12,7 +14,7 @@ internal class ConnectionHandler(
 {
     private TcpListener? _tcpListener;
 
-    private readonly List<ClientConnection> _clientConnections = [];
+    internal List<ClientConnection> ClientConnections { get; } = [];
 
     public Task InitializeAsync(CancellationToken cancellationToken)
     {
@@ -34,12 +36,33 @@ internal class ConnectionHandler(
             var client = await _tcpListener.AcceptTcpClientAsync(cancellationToken);
 
             var clientConnection = connectionFactory.CreateClientConnection(client);
-            _clientConnections.Add(clientConnection);
+            ClientConnections.Add(clientConnection);
 
             logger.LogInformation("Accepted new client {id} from IP address {ip}", clientConnection.ClientId, ((IPEndPoint?) client.Client.RemoteEndPoint)?.Address.ToString() ?? "Unknown");
 
-            _ = clientConnection.ListenAsync(cancellationToken).ContinueWith((_) => Task.Run(() => _clientConnections.Remove(clientConnection)));
+            _ = clientConnection.ListenAsync(cancellationToken).ContinueWith((_) => Task.Run(() => ClientConnections.Remove(clientConnection)));
         }
+    }
+
+    public async Task SendPacketAsync<TPacket>(TPacket packet, Guid? clientId = null) where TPacket : PacketBase
+    {
+        if (clientId is not null)
+        {
+            var client = ClientConnections.FirstOrDefault(x => x.ClientId == clientId);
+
+            client?.SendPacketAsync(packet);
+        }
+        else
+        {
+            foreach (var client in ClientConnections)
+                await client.SendPacketAsync(packet);
+        }
+    }
+
+    public void SetProtocolStateForClient(Guid clientId, ProtocolState state)
+    {
+        var client = ClientConnections.FirstOrDefault(x => x.ClientId == clientId);
+        client?.SetProtocolState(state);
     }
 
     public Task ShutdownAsync(CancellationToken cancellationToken)
