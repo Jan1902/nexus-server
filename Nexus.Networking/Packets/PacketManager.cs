@@ -109,7 +109,7 @@ internal class PacketManager(
 
             await mediator.Publish(message, cancellationToken);
 
-            connectionHandler.ClientConnections.FirstOrDefault(x => x.ClientId == packetData.ClientId)?.ReceiveLock.Release();
+            connectionHandler.ReleaseReceiveLock(packetData.ClientId);
         }
     }
 
@@ -136,7 +136,7 @@ internal class PacketManager(
 
         var data = new byte[stream.Position];
         var buffer = stream.GetBuffer();
-        buffer.AsMemory().Slice(0, (int) stream.Position).CopyTo(data.AsMemory());
+        buffer.AsMemory()[..(int) stream.Position].CopyTo(data.AsMemory());
 
         using var finalStream = _memoryStreamManager.GetStream();
         finalStream.WriteVarInt(registration.ID.ToBytesAsVarInt().Length + data.Length);
@@ -145,7 +145,7 @@ internal class PacketManager(
 
         var finalData = new byte[finalStream.Position];
         var finalBuffer = finalStream.GetBuffer();
-        finalBuffer.AsMemory().Slice(0, (int) finalStream.Position).CopyTo(finalData.AsMemory());
+        finalBuffer.AsMemory()[..(int) finalStream.Position].CopyTo(finalData.AsMemory());
 
         return finalData;
     }

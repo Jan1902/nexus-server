@@ -33,12 +33,8 @@ internal class ClientConnection(
 
         while (tcpClient.Connected)
         {
-            logger.LogTrace("Waiting for new data from client");
-
             var bytesRead = await networkStream.ReadAsync(_buffer, _currentLength, _buffer.Length - _currentLength, cancellationToken);
             _currentLength += bytesRead;
-
-            logger.LogTrace("Received {bytesRead} bytes from client {id}", bytesRead, ClientId);
 
             if (bytesRead == 0)
                 break;
@@ -51,21 +47,11 @@ internal class ClientConnection(
 
     private async Task CheckForCompletePacketsAsync(CancellationToken cancellationToken)
     {
-        while(!cancellationToken.IsCancellationRequested && _buffer.Length > 0)
+        while (!cancellationToken.IsCancellationRequested && _buffer.Length > 0)
         {
-            //if (_currentCompletePacketLength != 0 && _currentLength < _currentCompletePacketLength)
-                //break;
-
             var stream = _memoryStreamManager.GetStream(_buffer);
             var reader = new MinecraftBinaryReader(stream);
             var packetLength = reader.ReadVarInt();
-
-            //if (_currentCompletePacketLength == 0)
-            //{
-            //packetLength = packetLength + (int) reader.Position;
-
-                logger.LogTrace("Packet length: {length}", packetLength);
-            //}
 
             if (_currentLength < packetLength)
                 break;
@@ -76,12 +62,10 @@ internal class ClientConnection(
             await ReceiveLock.WaitAsync(cancellationToken);
             packetManager.EnqueuePacket(packetData, ClientId, _protocolState);
 
-            logger.LogTrace("Resetting buffer");
             var completeSize = (packetLength + packetLength.ToBytesAsVarInt().Length);
             _currentLength -= completeSize;
 
             Array.Copy(_buffer, completeSize, _buffer, 0, _currentLength);
-            //_currentCompletePacketLength = 0;
         }
     }
 

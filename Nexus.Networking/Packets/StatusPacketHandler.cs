@@ -7,24 +7,22 @@ namespace Nexus.Networking.Packets;
 
 internal class StatusPacketHandler(
     ConnectionHandler connectionHandler,
-    ILogger<StatusPacketHandler> logger)
+    NetworkingConfiguration configuration)
     : IPacketHandler<PingRequest>,
     IPacketHandler<StatusRequest>
 {
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+
     public Task HandlePacket(StatusRequest statusRequest, Guid clientId, CancellationToken cancellationToken)
     {
-        logger.LogTrace(statusRequest.ToString());
-
         var content = new StatusResponseContent(
-            new StatusVersion("1.21.1", 767),
-            new StatusPlayers(20, connectionHandler.ClientConnections.Count, connectionHandler.ClientConnections.Select(c => new StatusPlayersSample(c.Username ?? "Unknown", c.ClientId)).ToArray()),
-            new StatusDescription("Nexus - A Minecraft server thought different"),
+            new StatusVersion(configuration.ServerVersion, configuration.ProtocolVersion),
+            new StatusPlayers(configuration.MaxConnections, connectionHandler.ConnectionCount, connectionHandler.GetClients().Select(c => new StatusPlayersSample(c.Username, c.ClientId)).ToArray()),
+            new StatusDescription(configuration.Motd),
             "",
             false);
 
-        var json = JsonSerializer.Serialize(content, new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-
-        logger.LogTrace(json);
+        var json = JsonSerializer.Serialize(content, _jsonSerializerOptions);
 
         return connectionHandler.SendPacketAsync(new StatusResponse(json), clientId);
     }

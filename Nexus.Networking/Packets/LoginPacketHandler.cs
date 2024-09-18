@@ -16,8 +16,6 @@ internal class LoginPacketHandler(
     {
         connectionHandler.SetProtocolStateForClient(clientId, handshake.NextState);
 
-        logger.LogTrace(handshake.ToString());
-
         return Task.CompletedTask;
     }
 
@@ -25,9 +23,7 @@ internal class LoginPacketHandler(
     {
         logger.LogInformation("Player {id} logged in as {name}", clientId, loginStart.Name);
 
-        connectionHandler.ClientConnections.First(x => x.ClientId == clientId).Username = loginStart.Name;
-
-        logger.LogTrace(loginStart.ToString());
+        connectionHandler.AssignUsername(clientId, loginStart.Name);
 
         return connectionHandler.SendPacketAsync(new LoginSuccess(loginStart.PlayerUUID, loginStart.Name, [], true), clientId);
     }
@@ -36,7 +32,6 @@ internal class LoginPacketHandler(
     {
         connectionHandler.SetProtocolStateForClient(clientId, ProtocolState.Configuration);
 
-        logger.LogTrace(packet.ToString());
         return Task.CompletedTask;
     }
 }

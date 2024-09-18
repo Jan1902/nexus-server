@@ -14,7 +14,9 @@ internal class ConnectionHandler(
 {
     private TcpListener? _tcpListener;
 
-    internal List<ClientConnection> ClientConnections { get; } = [];
+    private readonly List<ClientConnection> _clientConnections = [];
+
+    public int ConnectionCount => _clientConnections.Count;
 
     public Task InitializeAsync(CancellationToken cancellationToken)
     {
@@ -36,11 +38,11 @@ internal class ConnectionHandler(
             var client = await _tcpListener.AcceptTcpClientAsync(cancellationToken);
 
             var clientConnection = connectionFactory.CreateClientConnection(client);
-            ClientConnections.Add(clientConnection);
+            _clientConnections.Add(clientConnection);
 
             logger.LogInformation("Accepted new client {id} from IP address {ip}", clientConnection.ClientId, ((IPEndPoint?) client.Client.RemoteEndPoint)?.Address.ToString() ?? "Unknown");
 
-            _ = clientConnection.ListenAsync(cancellationToken).ContinueWith((_) => Task.Run(() => ClientConnections.Remove(clientConnection)));
+            _ = clientConnection.ListenAsync(cancellationToken).ContinueWith((_) => Task.Run(() => _clientConnections.Remove(clientConnection)));
         }
     }
 
@@ -48,21 +50,42 @@ internal class ConnectionHandler(
     {
         if (clientId is not null)
         {
-            var client = ClientConnections.FirstOrDefault(x => x.ClientId == clientId);
+            var client = _clientConnections.FirstOrDefault(x => x.ClientId == clientId);
 
             client?.SendPacketAsync(packet);
         }
         else
         {
-            foreach (var client in ClientConnections)
+            foreach (var client in _clientConnections)
                 await client.SendPacketAsync(packet);
         }
     }
 
     public void SetProtocolStateForClient(Guid clientId, ProtocolState state)
     {
-        var client = ClientConnections.FirstOrDefault(x => x.ClientId == clientId);
-        client?.SetProtocolState(state);
+        var client = _clientConnections.FirstOrDefault(x => x.ClientId == clientId)
+            ?? throw new ArgumentException("Client does not exist.");
+
+        client.SetProtocolState(state);
+    }
+
+    public void ReleaseReceiveLock(Guid clientId)
+    {
+        var client = _clientConnections.FirstOrDefault(x => x.ClientId == clientId)
+            ?? throw new ArgumentException("Client does not exist.");
+
+        client.ReceiveLock.Release();
+    }
+
+    public (Guid ClientId, string Username)[] GetClients()
+        => _clientConnections.Select(x => (x.ClientId, x.Username ?? "Unknown")).ToArray();
+
+    public void AssignUsername(Guid clientId, string username)
+    {
+        var client = _clientConnections.FirstOrDefault(x => x.ClientId == clientId)
+            ?? throw new ArgumentException("Client does not exist.");
+
+        client.Username = username;
     }
 
     public Task ShutdownAsync(CancellationToken cancellationToken)
