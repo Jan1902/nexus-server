@@ -7,8 +7,4 @@
 	  <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.1" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Packets\Play\" />
-	</ItemGroup>
-
 </Project>

@@ -23,7 +23,7 @@ internal class ClientConnection(
 
     private static readonly RecyclableMemoryStreamManager _memoryStreamManager = new();
 
-    private ProtocolState _protocolState = ProtocolState.Handshake;
+    public ProtocolState ProtocolState { get; private set; } = ProtocolState.Handshake;
 
     public SemaphoreSlim ReceiveLock { get; } = new(1);
 
@@ -59,7 +59,7 @@ internal class ClientConnection(
             var packetData = reader.ReadBytes(packetLength);
 
             await ReceiveLock.WaitAsync(cancellationToken);
-            packetManager.EnqueuePacket(packetData, ClientId, _protocolState);
+            packetManager.EnqueuePacket(packetData, ClientId, ProtocolState);
 
             var completeSize = (packetLength + packetLength.ToBytesAsVarInt().Length);
             _currentLength -= completeSize;
@@ -74,5 +74,11 @@ internal class ClientConnection(
         await tcpClient.GetStream().WriteAsync(data);
     }
 
-    public void SetProtocolState(ProtocolState state) => _protocolState = state;
+    public void SetProtocolState(ProtocolState state) => ProtocolState = state;
+
+    public void Disconnect()
+    {
+        tcpClient.Close();
+        ReceiveLock.Dispose();
+    }
 }

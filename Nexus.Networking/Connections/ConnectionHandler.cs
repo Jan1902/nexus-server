@@ -16,7 +16,7 @@ internal class ConnectionHandler(
 
     private readonly List<ClientConnection> _clientConnections = [];
 
-    public int ConnectionCount => _clientConnections.Count;
+    public int ConnectionCount => _clientConnections.Count(c => c.ProtocolState == ProtocolState.Play);
 
     public Task InitializeAsync(CancellationToken cancellationToken)
     {
@@ -54,7 +54,7 @@ internal class ConnectionHandler(
         }
     }
 
-    public async Task SendPacketAsync<TPacket>(TPacket packet, Guid? clientId = null) where TPacket : PacketBase
+    public async Task SendPacketAsync<TPacket>(TPacket packet, Guid? clientId = null, ProtocolState? protocolState = null) where TPacket : PacketBase
     {
         if (clientId is not null)
         {
@@ -66,7 +66,7 @@ internal class ConnectionHandler(
         }
         else
         {
-            foreach (var client in _clientConnections)
+            foreach (var client in _clientConnections.Where(c => c.ProtocolState == protocolState || protocolState is null))
                 await client.SendPacketAsync(packet);
 
             logger.LogTrace("Sent packet {packetType} to all clients", packet.GetType().Name);
@@ -91,8 +91,8 @@ internal class ConnectionHandler(
         client.ReceiveLock.Release();
     }
 
-    public (Guid ClientId, string Username)[] GetClients()
-        => _clientConnections.Select(x => (x.ClientId, x.Username ?? "Unknown")).ToArray();
+    public (Guid ClientId, string Username)[] GetClients(ProtocolState? protocolState = null)
+        => _clientConnections.Where(c => c.ProtocolState == protocolState || protocolState is null).Select(x => (x.ClientId, x.Username ?? "Unknown")).ToArray();
 
     public void AssignUsername(Guid clientId, string username)
     {
@@ -100,6 +100,13 @@ internal class ConnectionHandler(
             ?? throw new ArgumentException("Client does not exist.");
 
         client.Username = username;
+    }
+
+    public void DisconnectClient(Guid clientId)
+    {
+        var client = _clientConnections.FirstOrDefault(x => x.ClientId == clientId)
+            ?? throw new ArgumentException("Client does not exist.");
+        client.Disconnect();
     }
 
     public Task ShutdownAsync(CancellationToken cancellationToken)

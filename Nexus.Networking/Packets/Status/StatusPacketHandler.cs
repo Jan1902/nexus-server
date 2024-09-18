@@ -17,7 +17,7 @@ internal class StatusPacketHandler(
     {
         var content = new StatusResponseContent(
             new StatusVersion(configuration.ServerVersion, configuration.ProtocolVersion),
-            new StatusPlayers(configuration.MaxConnections, connectionHandler.ConnectionCount, connectionHandler.GetClients().Select(c => new StatusPlayersSample(c.Username, c.ClientId)).ToArray()),
+            new StatusPlayers(configuration.MaxConnections, connectionHandler.ConnectionCount, connectionHandler.GetClients(Abstraction.ProtocolState.Play).Select(c => new StatusPlayersSample(c.Username, c.ClientId)).ToArray()),
             new StatusDescription(configuration.Motd),
             "",
             false);
