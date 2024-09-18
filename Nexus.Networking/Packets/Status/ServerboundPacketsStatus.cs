@@ -1,7 +1,7 @@
 using Nexus.Networking.Abstraction;
 using Nexus.Networking.Abstraction.Packets;
 
-namespace Nexus.Networking.Packets;
+namespace Nexus.Networking.Packets.Status;
 
 [AutoSerializedPacket(0x00, ProtocolState.Status, PacketDirection.ServerBound)]
 public record StatusRequest : PacketBase;

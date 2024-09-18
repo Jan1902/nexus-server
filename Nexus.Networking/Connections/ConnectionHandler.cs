@@ -37,6 +37,14 @@ internal class ConnectionHandler(
         {
             var client = await _tcpListener.AcceptTcpClientAsync(cancellationToken);
 
+            if (_clientConnections.Count >= configuration.MaxConnections)
+            {
+                logger.LogWarning("Client attempted to connect but server is full");
+                client.Close();
+
+                continue;
+            }
+
             var clientConnection = connectionFactory.CreateClientConnection(client);
             _clientConnections.Add(clientConnection);
 
@@ -53,11 +61,15 @@ internal class ConnectionHandler(
             var client = _clientConnections.FirstOrDefault(x => x.ClientId == clientId);
 
             client?.SendPacketAsync(packet);
+
+            logger.LogTrace("Sent packet {packetType} to client {clientId}", packet.GetType().Name, clientId);
         }
         else
         {
             foreach (var client in _clientConnections)
                 await client.SendPacketAsync(packet);
+
+            logger.LogTrace("Sent packet {packetType} to all clients", packet.GetType().Name);
         }
     }
 
@@ -67,6 +79,8 @@ internal class ConnectionHandler(
             ?? throw new ArgumentException("Client does not exist.");
 
         client.SetProtocolState(state);
+
+        logger.LogTrace("Set protocol state to {state} for client {clientId}", state, clientId);
     }
 
     public void ReleaseReceiveLock(Guid clientId)

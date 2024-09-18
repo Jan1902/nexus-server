@@ -2,8 +2,9 @@
 using Nexus.Networking.Abstraction;
 using Nexus.Networking.Abstraction.Packets;
 using Nexus.Networking.Connections;
+using Nexus.Networking.Packets.Configuration;
 
-namespace Nexus.Networking.Packets;
+namespace Nexus.Networking.Packets.Login;
 
 internal class LoginPacketHandler(
     ConnectionHandler connectionHandler,
@@ -32,6 +33,6 @@ internal class LoginPacketHandler(
     {
         connectionHandler.SetProtocolStateForClient(clientId, ProtocolState.Configuration);
 
-        return Task.CompletedTask;
+        return connectionHandler.SendPacketAsync(new ClientboundKnownPacks([]), clientId);
     }
 }

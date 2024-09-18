@@ -3,7 +3,7 @@ using Nexus.Networking.Abstraction.Packets;
 using Nexus.Networking.Connections;
 using System.Text.Json;
 
-namespace Nexus.Networking.Packets;
+namespace Nexus.Networking.Packets.Status;
 
 internal class StatusPacketHandler(
     ConnectionHandler connectionHandler,

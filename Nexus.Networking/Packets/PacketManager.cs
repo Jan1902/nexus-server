@@ -76,40 +76,48 @@ internal class PacketManager(
     {
         while (!cancellationToken.IsCancellationRequested)
         {
-            if (!_packetQueue.TryDequeue(out var packetData))
-                continue;
+            PacketData? packetData = null;
 
-            var registration = _registrations.FirstOrDefault(x => x.ID == packetData.ID && x.ProtocolState == packetData.ProtocolState && x.Direction == PacketDirection.ServerBound);
-            if (registration is null)
+            try
             {
-                logger.LogInformation("Tried handling unknown packet {id}", packetData.ID);
-                continue;
+                if (!_packetQueue.TryDequeue(out packetData))
+                    continue;
+
+                var registration = _registrations.FirstOrDefault(x => x.ID == packetData.ID && x.ProtocolState == packetData.ProtocolState && x.Direction == PacketDirection.ServerBound);
+                if (registration is null)
+                {
+                    logger.LogInformation("Tried handling unknown packet {id}", packetData.ID);
+                    continue;
+                }
+
+                var serializerType = typeof(IPacketSerializer<>).MakeGenericType(registration.PacketType);
+                using var stream = _memoryStreamManager.GetStream(packetData.Data);
+                using var reader = new MinecraftBinaryReader(stream);
+
+                var packet = (PacketBase?) serializerType.GetMethod(nameof(IPacketSerializer<PacketBase>.DeserializePacket))?.Invoke(registration.Serializer, [reader]);
+                if (packet is null)
+                {
+                    logger.LogWarning("Failed to deserialize packet {id}", packetData.ID);
+                    continue;
+                }
+
+                var messageType = typeof(PacketReceivedMessage<>).MakeGenericType(registration.PacketType);
+                var message = Activator.CreateInstance(messageType, [packet, packetData.ClientId]);
+                if (message is null)
+                {
+                    logger.LogWarning("Failed to create message for receival of packet {id}", packetData.ID);
+                    continue;
+                }
+
+                logger.LogTrace("Received packet {packetType} from client {clientId}", registration.PacketType.Name, packetData.ClientId);
+
+                await mediator.Publish(message, cancellationToken);
             }
-
-            var serializerType = typeof(IPacketSerializer<>).MakeGenericType(registration.PacketType);
-            using var stream = _memoryStreamManager.GetStream(packetData.Data);
-            using var reader = new MinecraftBinaryReader(stream);
-
-            var packet = (PacketBase?) serializerType.GetMethod(nameof(IPacketSerializer<PacketBase>.DeserializePacket))?.Invoke(registration.Serializer, [reader]);
-            if (packet is null)
+            finally
             {
-                logger.LogWarning("Failed to deserialize packet {id}", packetData.ID);
-                continue;
+                if (packetData is not null)
+                    connectionHandler.ReleaseReceiveLock(packetData.ClientId);
             }
-
-            var messageType = typeof(PacketReceivedMessage<>).MakeGenericType(registration.PacketType);
-            var message = Activator.CreateInstance(messageType, [packet, packetData.ClientId]);
-            if (message is null)
-            {
-                logger.LogWarning("Failed to create message for receival of packet {id}", packetData.ID);
-                continue;
-            }
-
-            logger.LogTrace("Received packet {packetType} from client {clientId}", registration.PacketType.Name, packetData.ClientId);
-
-            await mediator.Publish(message, cancellationToken);
-
-            connectionHandler.ReleaseReceiveLock(packetData.ClientId);
         }
     }
 

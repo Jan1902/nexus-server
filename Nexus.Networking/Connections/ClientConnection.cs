@@ -33,7 +33,7 @@ internal class ClientConnection(
 
         while (tcpClient.Connected)
         {
-            var bytesRead = await networkStream.ReadAsync(_buffer, _currentLength, _buffer.Length - _currentLength, cancellationToken);
+            var bytesRead = await networkStream.ReadAsync(_buffer.AsMemory(_currentLength, _buffer.Length - _currentLength), cancellationToken);
             _currentLength += bytesRead;
 
             if (bytesRead == 0)
@@ -57,7 +57,6 @@ internal class ClientConnection(
                 break;
 
             var packetData = reader.ReadBytes(packetLength);
-            logger.LogTrace("Received packet from client {id}", ClientId);
 
             await ReceiveLock.WaitAsync(cancellationToken);
             packetManager.EnqueuePacket(packetData, ClientId, _protocolState);
