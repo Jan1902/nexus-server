@@ -20,6 +20,8 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Nexus.Networking\Nexus.Networking.csproj" />
+	  <ProjectReference Include="..\Nexus.SharedModule\Nexus.SharedModule.csproj" />
+	  <ProjectReference Include="..\Nexus.Entities\Nexus.Entities.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

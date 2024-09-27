@@ -24,6 +24,7 @@ public class PacketSerializationGeneratorBase
             "short" => "Short",
             "ushort" => "UShort",
             "int" => "VarInt",
+            "Vector3i" => "Position",
             "uint" => "UInt",
             "long" => "Long",
             "ulong" => "ULong",
@@ -35,47 +36,6 @@ public class PacketSerializationGeneratorBase
             "NbtTag" => "NbtTag",
             _ => null
         };
-    }
-
-    protected static string FormatCode(string code)
-    {
-        var lines = code.Split('\n').Select(s => s.Trim());
-
-        var strBuilder = new StringBuilder();
-
-        int indentCount = 0;
-        bool shouldIndent = false;
-
-        foreach (string line in lines)
-        {
-            if (shouldIndent)
-                indentCount++;
-
-            if (line.Trim() == "}")
-                indentCount--;
-
-            if (indentCount == 0)
-            {
-                strBuilder.AppendLine(line);
-                shouldIndent = line.Contains("{");
-
-                continue;
-            }
-
-            string blankSpace = string.Empty;
-            for (int i = 0; i < indentCount; i++)
-            {
-                blankSpace += "    ";
-            }
-
-            if (line.Contains("}") && line.Trim() != "}")
-                indentCount--;
-
-            strBuilder.AppendLine(blankSpace + line);
-            shouldIndent = line.Contains("{");
-        }
-
-        return strBuilder.ToString();
     }
 
     public void Initialize(GeneratorInitializationContext context)

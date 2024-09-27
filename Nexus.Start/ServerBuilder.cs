@@ -3,6 +3,7 @@ using MediatR.Extensions.Autofac.DependencyInjection;
 using MediatR.Extensions.Autofac.DependencyInjection.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Nexus.Entities;
 using Nexus.Framework.Abstraction;
 using Nexus.Networking;
 using Serilog;
@@ -14,7 +15,9 @@ namespace Nexus.Start;
 internal class ServerBuilder
 {
     private static readonly Type[] Modules = [
-            typeof(NetworkingModule)
+            typeof(NetworkingModule),
+            typeof(SharedModule.SharedModule),
+            typeof(EntitiesModule),
         ];
 
     public static Server BuildServer()
@@ -45,6 +48,7 @@ internal class ServerBuilder
 
         // Internals
         builder.RegisterType<Server>().AsSelf().SingleInstance();
+        builder.RegisterType<NexusMediator>().AsSelf().SingleInstance();
 
         // Load Modules
         foreach (var module in Modules)

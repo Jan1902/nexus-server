@@ -1,0 +1,10 @@
+#EnumTemplate
+namespace Nexus.Shared.Registries;
+
+public enum {{type}}
+{
+	{{values}}
+}
+
+#EnumValueTemplate
+{{name}} = {{value}}

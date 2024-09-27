@@ -31,7 +31,7 @@ public class PacketSerializationGenerator : PacketSerializationGeneratorBase, IS
         template.Set("deserializeContent", BuildDeserializeMethod(packet));
 
         var content = template.Render();
-        content = FormatCode(content);
+        content = CodeFormatter.FormatCode(content);
 
         return content;
     }

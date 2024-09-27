@@ -6,12 +6,16 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
-	<ItemGroup Condition="'$(ProjectName)' != 'Nexus.Framework.Abstraction'">
+	<ItemGroup Condition="'$(ProjectName)' != 'Nexus.Framework.Abstraction' And !$(ProjectName.EndsWith('Abstraction'))">
 		<ProjectReference Include="..\Nexus.Framework.Abstraction\Nexus.Framework.Abstraction.csproj" />
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(ProjectName)' != 'Nexus.Networking.Abstraction'">
+	<ItemGroup Condition="'$(ProjectName)' != 'Nexus.Networking.Abstraction' And !$(ProjectName.EndsWith('Abstraction'))">
 		<ProjectReference Include="..\Nexus.Networking.Abstraction\Nexus.Networking.Abstraction.csproj" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(ProjectName)' != 'Nexus.SharedModule.Abstraction' And !$(ProjectName.EndsWith('Abstraction'))">
+		<ProjectReference Include="..\Nexus.SharedModule.Abstraction\Nexus.SharedModule.Abstraction.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

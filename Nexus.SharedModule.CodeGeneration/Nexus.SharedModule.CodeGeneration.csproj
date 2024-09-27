@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<Import Project="..\CodeGenerationProjectTemplate.csproj" />
+
+	<ItemGroup>
+	  <None Remove="Resources\registries.json" />
+	  <None Remove="Templates\EnumTemplate.ct" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Resources\registries.json" />
+	  <EmbeddedResource Include="Templates\EnumTemplate.ct" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="System.Text.Json" Version="8.0.4" PrivateAssets="all" GeneratePathProperty="true" />
+	</ItemGroup>
+
+	<PropertyGroup>
+		<GetTargetPathDependsOn>$(GetTargetPathDependsOn);GetDependencyTargetPaths</GetTargetPathDependsOn>
+	</PropertyGroup>
+
+	<Target Name="GetDependencyTargetPaths">
+		<ItemGroup>
+			<TargetPathWithTargetPlatformMoniker Include="$(PKGSystem_Text_Json)\lib\netstandard2.0\System.Text.Json.dll" IncludeRuntimeDependencies="false"/>
+		</ItemGroup>
+	</Target>
+
+</Project>

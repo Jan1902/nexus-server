@@ -1,5 +1,6 @@
 ﻿using Nexus.Networking.Abstraction;
 using Nexus.Networking.Abstraction.Packets;
+using Nexus.Shared;
 
 namespace Nexus.Networking.Packets.Configuration;
 
@@ -29,12 +30,6 @@ public enum DisplayedSkinParts
     LeftPants = 0x10,
     RightPants = 0x20,
     Hat = 0x40
-}
-
-public enum MainHand
-{
-    Left = 0,
-    Right = 1
 }
 
 [AutoSerializedPacket(0x03, ProtocolState.Configuration, PacketDirection.ServerBound)]

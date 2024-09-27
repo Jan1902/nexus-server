@@ -24,9 +24,8 @@ internal class Server(
 
             var servicesToRun = context.Resolve<IEnumerable<IRunAsync>>();
             logger.LogInformation("Running {count} services", servicesToRun.Count());
-            var runTasks = servicesToRun.Select(i => i.RunAsync(cancellationToken)).ToList();
 
-            await Task.WhenAll(runTasks);
+            await Parallel.ForEachAsync(servicesToRun, cancellationToken, async (s, c) => await s.RunAsync(c));
         }
         catch (Exception e) when (e is TaskCanceledException or OperationCanceledException)
         {
@@ -39,14 +38,12 @@ internal class Server(
 
         try
         {
-            var timeoutTask = Task.Delay(ShutdownTimeoutMS, CancellationToken.None);
-
-
             var servicesToShutdown = context.Resolve<IEnumerable<IShutdownAsync>>();
             logger.LogInformation("Shutting down {count} services", servicesToShutdown.Count());
             var shutdownTasks = servicesToShutdown.Select(i => i.ShutdownAsync(cancellationToken));
 
-            var shutdownTask = Task.WhenAll();
+            var shutdownTask = Task.WhenAll(shutdownTasks);
+            var timeoutTask = Task.Delay(ShutdownTimeoutMS, CancellationToken.None);
 
             var firstTask = await Task.WhenAny(shutdownTask, timeoutTask);
             if (firstTask == timeoutTask)

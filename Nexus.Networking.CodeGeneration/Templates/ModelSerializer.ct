@@ -1,5 +1,7 @@
 using Nexus.Networking.Abstraction;
 using Nexus.Networking.Abstraction.Data;
+using Nexus.Shared;
+using Nexus.SharedModule.Abstraction;
 
 namespace {{namespace}};
 
