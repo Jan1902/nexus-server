@@ -1,5 +1,5 @@
-﻿using Nexus.Networking.Abstraction.Packets;
-using Nexus.Networking.Abstraction;
+﻿using Nexus.Networking.Abstraction;
+using Nexus.Networking.Abstraction.Packets;
 
 namespace Nexus.Networking.Packets.Status;
 

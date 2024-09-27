@@ -1,9 +1,9 @@
-﻿using Nexus.Networking.Abstraction.Data;
+﻿using BitConverter;
 using Nexus.Networking.Abstraction;
+using Nexus.Networking.Abstraction.Data;
+using Nexus.Networking.CustomTypes;
 using Nexus.Shared;
 using System.Text;
-using BitConverter;
-using Nexus.Networking.CustomTypes;
 
 namespace Nexus.Networking.Data;
 

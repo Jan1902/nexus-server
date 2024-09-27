@@ -1,5 +1,4 @@
 ﻿using Microsoft.CodeAnalysis;
-using System.Text;
 
 namespace Nexus.Networking.CodeGeneration;
 
@@ -16,27 +15,24 @@ public class PacketSerializationGeneratorBase
     protected const string LengthAttributeName = "Length";
     protected const string OverwriteTypeAttributeName = "OverwriteType";
 
-    public static string? MapTypeToReaderWriterMethod(string type)
+    public static string? MapTypeToReaderWriterMethod(string type) => type switch
     {
-        return type switch
-        {
-            "byte" => "Byte",
-            "short" => "Short",
-            "ushort" => "UShort",
-            "int" => "VarInt",
-            "Vector3i" => "Position",
-            "uint" => "UInt",
-            "long" => "Long",
-            "ulong" => "ULong",
-            "float" => "Float",
-            "double" => "Double",
-            "bool" => "Bool",
-            "string" => "StringWithVarIntPrefix",
-            "Guid" => "UUID",
-            "NbtTag" => "NbtTag",
-            _ => null
-        };
-    }
+        "byte" => "Byte",
+        "short" => "Short",
+        "ushort" => "UShort",
+        "int" => "VarInt",
+        "Vector3i" => "Position",
+        "uint" => "UInt",
+        "long" => "Long",
+        "ulong" => "ULong",
+        "float" => "Float",
+        "double" => "Double",
+        "bool" => "Bool",
+        "string" => "StringWithVarIntPrefix",
+        "Guid" => "UUID",
+        "NbtTag" => "NbtTag",
+        _ => null
+    };
 
     public void Initialize(GeneratorInitializationContext context)
         => context.RegisterForSyntaxNotifications(() => new PacketSerializationSyntaxReceiver());

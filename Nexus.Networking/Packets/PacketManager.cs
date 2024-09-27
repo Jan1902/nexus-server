@@ -140,7 +140,7 @@ internal class PacketManager(
         var registration = _registrations.FirstOrDefault(x => x.PacketType == packet.GetType())
             ?? throw new ArgumentException($"Packet {packet.GetType()} is not registered.");
 
-        ((IPacketSerializer<TPacket>)registration.Serializer).SerializePacket(packet, writer);
+        ((IPacketSerializer<TPacket>) registration.Serializer).SerializePacket(packet, writer);
 
         var data = new byte[stream.Position];
         var buffer = stream.GetBuffer();
@@ -158,6 +158,7 @@ internal class PacketManager(
         return finalData;
     }
 
-    record PacketRegistration(int ID, ProtocolState ProtocolState, PacketDirection Direction, Type PacketType, object Serializer);
-    record PacketData(int ID, byte[] Data, Guid ClientId, ProtocolState ProtocolState);
+    private record PacketRegistration(int ID, ProtocolState ProtocolState, PacketDirection Direction, Type PacketType, object Serializer);
+
+    private record PacketData(int ID, byte[] Data, Guid ClientId, ProtocolState ProtocolState);
 }

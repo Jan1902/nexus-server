@@ -7,11 +7,8 @@ namespace Nexus.Networking.Connections;
 
 internal class ClientConnectionFactory(IComponentContext context)
 {
-    public ClientConnection CreateClientConnection(TcpClient tcpClient)
-    {
-        return new ClientConnection(
+    public ClientConnection CreateClientConnection(TcpClient tcpClient) => new(
             tcpClient,
             context.Resolve<PacketManager>(),
             context.Resolve<ILogger<ClientConnection>>());
-    }
 }

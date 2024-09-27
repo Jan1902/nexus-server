@@ -127,7 +127,7 @@ public class PacketSerializationGenerator : PacketSerializationGeneratorBase, IS
                     writerMethod = "BytesWithVarIntPrefix";
             }
 
-            CodeTemplate defaultAccess = TemplateDefinitionsSerialization.DefaultAccess
+            var defaultAccess = TemplateDefinitionsSerialization.DefaultAccess
                 .Set("field", parameterName)
                 .Set("cast", castType is not null ? $"({castType}) " : string.Empty);
 

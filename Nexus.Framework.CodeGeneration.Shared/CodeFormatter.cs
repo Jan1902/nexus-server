@@ -10,10 +10,10 @@ public static class CodeFormatter
 
         var strBuilder = new StringBuilder();
 
-        int indentCount = 0;
-        bool shouldIndent = false;
+        var indentCount = 0;
+        var shouldIndent = false;
 
-        foreach (string line in lines)
+        foreach (var line in lines)
         {
             if (shouldIndent)
                 indentCount++;
@@ -29,8 +29,8 @@ public static class CodeFormatter
                 continue;
             }
 
-            string blankSpace = string.Empty;
-            for (int i = 0; i < indentCount; i++)
+            var blankSpace = string.Empty;
+            for (var i = 0; i < indentCount; i++)
             {
                 blankSpace += "    ";
             }

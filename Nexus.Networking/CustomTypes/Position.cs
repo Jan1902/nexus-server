@@ -1,5 +1,4 @@
-﻿using Nexus.Networking.Abstraction.Data;
-using Nexus.Networking.Data;
+﻿using Nexus.Networking.Data;
 using Nexus.Shared;
 
 namespace Nexus.Networking.CustomTypes;

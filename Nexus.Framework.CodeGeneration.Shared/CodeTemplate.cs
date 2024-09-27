@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace Nexus.Framework.CodeGeneration.Shared;
+﻿namespace Nexus.Framework.CodeGeneration.Shared;
 
 /// <summary>
 /// Represents a code template that can be rendered with variable replacements.

@@ -52,7 +52,7 @@ internal class Server(
                 return;
             }
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             logger.LogError(e, "An error occurred while shutting down the server");
         }

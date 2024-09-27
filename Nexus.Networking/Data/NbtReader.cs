@@ -1,5 +1,5 @@
-﻿using Nexus.Networking.Abstraction.Data;
-using Nexus.Networking.Abstraction;
+﻿using Nexus.Networking.Abstraction;
+using Nexus.Networking.Abstraction.Data;
 
 namespace Nexus.Networking.Data;
 

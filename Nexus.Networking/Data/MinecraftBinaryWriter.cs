@@ -1,6 +1,6 @@
 ﻿using BitConverter;
-using Nexus.Networking.Abstraction.Data;
 using Nexus.Networking.Abstraction;
+using Nexus.Networking.Abstraction.Data;
 using Nexus.Networking.CustomTypes;
 using Nexus.Shared;
 using System.Text;

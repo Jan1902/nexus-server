@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using Nexus.Framework.CodeGeneration.Shared;
-using System.Reflection;
 using System.Text.Json;
 
 namespace Nexus.SharedModule.CodeGeneration;
@@ -13,8 +12,8 @@ public class RegistryGenerator : ISourceGenerator
 
     public void Execute(GeneratorExecutionContext context)
     {
-        Assembly assembly = GetType().Assembly;
-        using Stream resourceStream = assembly.GetManifestResourceStream("Nexus.SharedModule.CodeGeneration.Resources.registries.json");
+        var assembly = GetType().Assembly;
+        using var resourceStream = assembly.GetManifestResourceStream("Nexus.SharedModule.CodeGeneration.Resources.registries.json");
 
         if (resourceStream != null)
         {
@@ -23,7 +22,7 @@ public class RegistryGenerator : ISourceGenerator
 
             var jsonDocument = JsonDocument.Parse(jsonText);
 
-            foreach(var registry in jsonDocument.RootElement.EnumerateObject())
+            foreach (var registry in jsonDocument.RootElement.EnumerateObject())
             {
                 var registryName = registry.Name;
                 registryName = NormalizeName(registryName);
@@ -53,13 +52,7 @@ public class RegistryGenerator : ISourceGenerator
 
     public void Initialize(GeneratorInitializationContext context) { }
 
-    public static string NormalizeName(string name)
-    {
-        return name.Replace("minecraft:", "").Replace("/", "_").Replace(":", "_").Replace(".", "_");
-    }
+    public static string NormalizeName(string name) => name.Replace("minecraft:", "").Replace("/", "_").Replace(":", "_").Replace(".", "_");
 
-    public static string ConvertToPascalCase(string name)
-    {
-        return string.Join("", name.Split('_').Select(word => word.Substring(0, 1).ToUpper() + word.Substring(1).ToLower()));
-    }
+    public static string ConvertToPascalCase(string name) => string.Join("", name.Split('_').Select(word => word.Substring(0, 1).ToUpper() + word.Substring(1).ToLower()));
 }

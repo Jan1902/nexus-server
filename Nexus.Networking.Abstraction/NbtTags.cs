@@ -15,7 +15,7 @@ public class CompoundTag : NbtTag
         => Children = children;
 
     public CompoundTag(string? name = null) : base(name)
-        => Children = new List<NbtTag>();
+        => Children = [];
 }
 
 public class IntTag : NbtTag
@@ -112,11 +112,11 @@ public class ListTag : NbtTag
     public ListTag(Type tagType, string? name = null) : base(name)
     {
         TagType = tagType;
-        Items = new List<NbtTag>();
+        Items = [];
     }
 
     public ListTag(string? name = null) : base(name)
-        => Items = new List<NbtTag>();
+        => Items = [];
 }
 
 public class IntArrayTag : NbtTag

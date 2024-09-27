@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Nexus.Networking.Abstraction.Packets;
+﻿using Nexus.Networking.Abstraction.Packets;
 using Nexus.Networking.Connections;
 using System.Text.Json;
 
