@@ -5,5 +5,9 @@ namespace Nexus.Entities;
 
 public class EntitiesModule : ModuleBase
 {
-    public override void Load(ContainerBuilder builder) => builder.RegisterType<EntityManager>().AsSelf().SingleInstance();
+    public override void Load(ContainerBuilder builder)
+    {
+        builder.RegisterType<EntityManager>().AsSelf().SingleInstance();
+        builder.RegisterConfiguration<EntitiesConfiguration>();
+    }
 }

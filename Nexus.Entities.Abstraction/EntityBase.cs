@@ -1,8 +1,8 @@
-﻿
-using Nexus.Shared;
+﻿using Nexus.Shared;
 using Nexus.Shared.Registries;
 
 namespace Nexus.Entities.Abstraction;
+
 public abstract class EntityBase(int entityId) : DomainEntityBase
 {
     public int EntityID { get; } = entityId;

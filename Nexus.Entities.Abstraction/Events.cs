@@ -1,6 +1,5 @@
 ﻿using MediatR;
-using Nexus.Entities.Abstraction;
 
-namespace Nexus.Entities;
+namespace Nexus.Entities.Abstraction;
 
 public record EntitySpawnedEvent(EntityBase Entity) : INotification;

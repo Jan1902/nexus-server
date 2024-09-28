@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Nexus.Entities.Abstraction;
 
 namespace Nexus.Entities;
 

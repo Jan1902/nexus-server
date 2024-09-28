@@ -72,8 +72,7 @@ public class PacketSerializationGenerator : PacketSerializationGeneratorBase, IS
 
             var conditional = false;
             // Conditional values
-            if (parameter.AttributeLists.Any(l => l.Attributes.Any(a => a.Name.ToString() == ConditionalAttributeName))
-                    || parameterType.EndsWith("?"))
+            if (parameter.AttributeLists.Any(l => l.Attributes.Any(a => a.Name.ToString() == ConditionalAttributeName)) || parameterType.EndsWith("?"))
             {
                 parameterType = parameterType?.Replace("?", "");
                 conditional = true;

@@ -105,12 +105,17 @@ public class PacketAttribute(int packetId, ProtocolState state = ProtocolState.P
 /// Specifies the conditional attribute for a parameter in a packet.
 /// </summary>
 [AttributeUsage(AttributeTargets.Parameter)]
-public class ConditionalAttribute(ConditionalType type = ConditionalType.PreviousBoolean) : Attribute
+public class ConditionalAttribute(ConditionalType type = ConditionalType.PreviousBoolean, string? parameterName = null) : Attribute
 {
     /// <summary>
     /// Gets the type of conditional attribute.
     /// </summary>
     public ConditionalType Type { get; } = type;
+
+    /// <summary>
+    /// The name of the parameter that the conditional attribute depends on.
+    /// </summary>
+    public string? ConditionalName { get; }
 }
 
 /// <summary>
@@ -118,7 +123,8 @@ public class ConditionalAttribute(ConditionalType type = ConditionalType.Previou
 /// </summary>
 public enum ConditionalType
 {
-    PreviousBoolean
+    PreviousBoolean,
+    NamedBoolean
 }
 
 /// <summary>
@@ -156,7 +162,9 @@ public class OverwriteTypeAttribute(OverwriteType type) : Attribute
 /// </summary>
 public enum OverwriteType
 {
-    Int
+    Int,
+    UByte,
+    Byte
 }
 
 /// <summary>

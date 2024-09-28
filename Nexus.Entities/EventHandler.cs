@@ -9,11 +9,12 @@ namespace Nexus.Entities;
 internal class EventHandler(
     EntityManager manager,
     IMediator mediator,
-    ILogger<EventHandler> logger) : INotificationHandler<PlayerJoinedEvent>
+    ILogger<EventHandler> logger,
+    EntitiesConfiguration configuration) : INotificationHandler<PlayerJoinedEvent>
 {
     public async Task Handle(PlayerJoinedEvent playerJoined, CancellationToken cancellationToken)
     {
-        var playerEntity = new Player(playerJoined.Username, playerJoined.ClientId, manager.GetNextEntityID());
+        var playerEntity = new Player(playerJoined.Username, playerJoined.ClientId, manager.GetNextEntityID(), configuration.DefaultGameMode);
         var world = manager.GetDefaultWorld();
 
         world.SpawnEntity(playerEntity);

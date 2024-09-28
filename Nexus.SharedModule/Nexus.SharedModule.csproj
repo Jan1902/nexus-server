@@ -2,4 +2,8 @@
 
 	<Import Project="..\ModuleProjectTemplate.csproj" />
 
+	<ItemGroup>
+	  <ProjectReference Include="..\Nexus.Entities.Abstraction\Nexus.Entities.Abstraction.csproj" />
+	</ItemGroup>
+
 </Project>
